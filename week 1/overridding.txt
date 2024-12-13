@@ -1,0 +1,50 @@
+#include <iostream>
+using namespace std;
+
+class Person
+{               
+                //vptr ,vtable
+	string name;
+	public:
+		Person(string name):name(name){}
+
+		virtual void show()
+		{
+			cout<<"Name is : "<<name<<endl;
+		}
+		
+		virtual void display()
+		{
+		    cout<<"I am display function "<<endl;
+		}
+};
+
+class Student : public Person
+{
+            //vptr,vtable
+	int roll;
+
+	public:
+		Student(int roll,string name):roll(roll),Person(name){}
+
+		void show()
+		{
+			cout<<"Roll number : "<<roll<<endl;
+		}
+		
+		void display()
+		{
+		    cout<<"I am display function in derived "<<endl;
+		}
+};
+
+int main()
+{
+    
+	Person* p = new Student(10,"Munilaxmi");
+	p->show();
+	p->display();
+		
+	return 0;
+}
+

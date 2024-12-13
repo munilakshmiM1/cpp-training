@@ -1,0 +1,70 @@
+// abstract classs
+
+
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+// Abstract class
+class BankAccount {
+protected:
+    string accountHolder;
+    double balance;
+
+public:
+    BankAccount(string name, double initialBalance) {
+        accountHolder = name;
+        balance = initialBalance;
+    }
+
+    // Pure virtual function
+    virtual void deposit(double amount) = 0;
+    virtual void withdraw(double amount) = 0;
+
+    void displayBalance() const {
+        cout << "Account Holder: " << accountHolder << endl;
+        cout << "Balance: $" << balance << endl;
+    }
+
+    virtual ~BankAccount() {}  // Virtual destructor
+};
+
+class SavingsAccount : public BankAccount {
+private:
+    double interestRate;
+
+public:
+    SavingsAccount(string name, double initialBalance, double rate)
+        : BankAccount(name, initialBalance), interestRate(rate) {}
+
+    void deposit(double amount) override {
+        balance += amount;
+        cout << "$" << amount << " deposited successfully!" << endl;
+    }
+
+    void withdraw(double amount) override {
+        if (amount <= balance) {
+            balance -= amount;
+            cout << "$" << amount << " withdrawn successfully!" << endl;
+        } else {
+            cout << "Insufficient balance!" << endl;
+        }
+    }
+};
+
+int main() {
+    SavingsAccount myAccount("John Doe", 1000.0, 0.05);
+
+    myAccount.displayBalance();
+
+    myAccount.deposit(500.0);
+    myAccount.displayBalance();
+
+    myAccount.withdraw(300.0);
+    myAccount.displayBalance();
+
+    myAccount.withdraw(1500.0); // Attempting to withdraw more than the balance
+
+    return 0;
+}

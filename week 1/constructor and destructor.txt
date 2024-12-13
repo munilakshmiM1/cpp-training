@@ -1,0 +1,64 @@
+// constructor and destructor
+
+#include <iostream> 
+#include <string> 
+using namespace std; 
+class BankAccount { 
+private: 
+int accountNumber;       
+// Unique account number 
+string accountHolder;     // Name of the account holder 
+double balance;           
+// Account balance 
+public: 
+// Constructor 
+BankAccount(int accNum, string holder, double initialBalance)  
+: accountNumber(accNum), accountHolder(holder), balance(initialBalance) {} 
+// Method to deposit money into the account 
+void deposit(double amount) { 
+if (amount > 0) { 
+balance += amount; 
+cout << "Deposited: $" << amount << ". New balance: $" << balance << 
+endl; 
+
+} else { 
+cout << "Deposit amount must be positive!" << endl; 
+} 
+} 
+// Method to withdraw money from the account 
+void withdraw(double amount) { 
+if (amount > balance) { 
+cout << "Insufficient funds. Withdrawal of $" << amount << " failed." << 
+endl; 
+} else if (amount <= 0) { 
+cout << "Withdrawal amount must be positive!" << endl; 
+} else { 
+balance -= amount; 
+cout << "Withdrew: $" << amount << ". New balance: $" << balance << 
+endl; 
+} 
+} 
+// Method to display account information 
+void display() const { 
+cout << "Account Number: " << accountNumber << endl; 
+cout << "Account Holder: " << accountHolder << endl; 
+cout << "Balance: $" << balance << endl; 
+} 
+}; 
+int main() { 
+// Create a BankAccount object 
+BankAccount account1(123456, "Alice Johnson", 500.00); 
+// Display initial account details 
+cout << "Initial Account Details:" << endl; 
+account1.display(); 
+cout << endl; 
+// Perform transactions 
+account1.deposit(200.50); 
+
+account1.withdraw(100.25); 
+account1.withdraw(700);  // Should fail due to insufficient funds 
+// Display updated account details 
+cout << "\nUpdated Account Details:" << endl; 
+account1.display(); 
+return 0; 
+} 

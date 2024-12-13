@@ -1,0 +1,276 @@
+ASSSESSMENT-1 : E-COMMERCE 
+
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+class amazonProduct {
+    int product_id;
+    string name;
+    float price;
+
+public:
+    amazonProduct(int id, string n, float p) : product_id(id), name(n), price(p) {}
+    virtual ~amazonProduct() {}
+
+    virtual void displayDetails() const {
+        cout << "Product ID: " << product_id << ", Name: " << name << ", Price: $" << price << endl;
+    }
+
+    double getPrice() const {
+        return price;
+    }
+
+    int getId() const {
+        return product_id;
+    }
+};
+class Electronics : public amazonProduct {
+    string warranty;
+
+public:
+    Electronics(int id, string n, float p, string war) : amazonProduct(id, n, p), warranty(war) {}
+
+    void displayDetails() const override {
+        amazonProduct::displayDetails();
+        cout << "Warranty: " << warranty << endl;
+    }
+};
+class Clothing : public amazonProduct {
+    int size;
+    string color;
+
+public:
+    Clothing(int id, string n, float p, int s, string c) : amazonProduct(id, n, p), size(s), color(c) {}
+
+    void displayDetails() const override {
+        amazonProduct::displayDetails();
+        cout << "Size: " << size << ", Color: " << color << endl;
+    }
+};
+class Customer {
+    int customer_id;
+    string name;
+    string email;
+    int phone;
+
+public:
+    Customer(int id, string n, string em, int ph) : customer_id(id), name(n), email(em), phone(ph) {}
+
+    void displayCustomerDetails() const {
+        cout << "Customer ID: " << customer_id << ", Name: " << name << ", Email: " << email << ", Phone: " << phone << endl;
+    }
+
+    int getCustomerId() const {
+        return customer_id;
+    }
+
+    string getName() const {
+        return name;
+    }
+};
+class Order {
+    int order_id;
+    Customer customer;
+    vector<amazonProduct*> products;
+    float total_amount;
+    string status;
+
+public:
+    Order(int id, const Customer& c) : order_id(id), customer(c), total_amount(0), status("Pending") {}
+
+    void addProduct(amazonProduct* product) {
+        products.push_back(product);
+        total_amount += product->getPrice();
+    }
+
+    void removeProduct(int product_id) {
+        for (auto it = products.begin(); it != products.end(); ++it) {
+            if ((*it)->getId() == product_id) {
+                total_amount -= (*it)->getPrice();
+                products.erase(it);
+                cout << "Product removed from cart.\n";
+                return;
+            }
+        }
+        cout << "Product not found in cart.\n";
+    }
+
+    void displayOrderDetails() const {
+        cout << "\nOrder ID: " << order_id << ", Customer: " << customer.getName() << ", Status: " << status << endl;
+        cout << "Products in the Order:" << endl;
+        for (const auto& product : products) {
+            product->displayDetails();
+        }
+        cout << "Total Amount: $" << total_amount << endl;
+    }
+
+    float getTotalAmount() const {
+        return total_amount;
+    }
+
+    void changeStatus(const string& new_status) {
+        status = new_status;
+    }
+};
+class Payment {
+protected:
+    double amount;
+
+public:
+    Payment(double amt) : amount(amt) {}
+    virtual ~Payment() {}
+    virtual void processPayment() const = 0;
+};
+class CreditCardPayment : public Payment {
+    string card_number;
+
+public:
+    CreditCardPayment(double amt, const string& card_number) : Payment(amt), card_number(card_number) {}
+
+    void processPayment() const override {
+        cout << "Processing Credit Card payment of $" << amount << " with card number " << card_number << endl;
+    }
+};
+
+class CashOnDeliveryPayment : public Payment {
+public:
+    CashOnDeliveryPayment(double amt) : Payment(amt) {}
+
+    void processPayment() const override {
+        cout << "Processing Cash on Delivery payment of $" << amount << endl;
+    }
+};
+class Inventory {
+    vector<amazonProduct*> stock;
+
+public:
+    void addProduct(amazonProduct* product) {
+        stock.push_back(product);
+    }
+
+    bool checkAvailability(int product_id) const {
+        for (auto& product : stock) {
+            if (product->getId() == product_id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    amazonProduct* getProduct(int product_id) {
+        for (auto& product : stock) {
+            if (product->getId() == product_id) {
+                return product;
+            }
+        }
+        return nullptr;
+    }
+
+    void displayProducts() const {
+        for (const auto& product : stock) {
+            product->displayDetails();
+        }
+    }
+};
+void displayMenu() {
+    cout << "\n1. Add product to cart\n";
+    cout << "2. Remove product from cart\n";
+    cout << "3. View cart\n";
+    cout << "4. Choose payment method\n";
+    cout << "5. Complete order\n";
+    cout << "6. Exit\n";
+    
+}
+int main() {
+    Inventory inventory;
+    inventory.addProduct(new Electronics(1, "Laptop", 1200.99, "2 Years"));
+    inventory.addProduct(new Clothing(2, "Kurtha Set", 1500.00, 40, "Black"));
+    Customer customer(1, "Lucky", "lucky@example.com", 9387237);
+    Order order(1001, customer);
+
+    int choice;
+    while (true) {
+        displayMenu();
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        if (choice == 1) {
+            inventory.displayProducts();
+            int product_id;
+            cout << "Enter product ID to add to cart: ";
+            cin >> product_id;
+
+            amazonProduct* product = inventory.getProduct(product_id);
+            if (product) {
+                order.addProduct(product);
+                cout << "Product added to cart.\n";
+            } else {
+                cout << "Product not found.\n";
+            }
+        }
+        else if (choice == 2) {
+            int product_id;
+            cout << "Enter product ID to remove from cart: ";
+            cin >> product_id;
+
+            order.removeProduct(product_id);
+        }
+        else if (choice == 3) {
+            
+            order.displayOrderDetails();
+        }
+        else if (choice == 4) {
+            cout << "\nChoose payment method:\n";
+            cout << "1. Credit Card\n";
+            cout << "2. Cash on Delivery\n";
+            int payment_choice;
+            cin >> payment_choice;
+
+            if (payment_choice == 1) {
+                string card_number;
+                cout << "Enter card number: ";
+                cin >> card_number;
+                Payment* payment = new CreditCardPayment(order.getTotalAmount(), card_number);
+                payment->processPayment();
+                delete payment;
+            }
+            else if (payment_choice == 2) {
+                Payment* payment = new CashOnDeliveryPayment(order.getTotalAmount());
+                payment->processPayment();
+                delete payment;
+            }
+            else {
+                cout << "Invalid payment choice.\n";
+            }
+        }
+        else if (choice == 5) {
+        
+            order.changeStatus("Completed");
+            cout << "Order completed.\n";
+            break;
+        }
+        else if (choice == 6) {
+            
+            cout << "thanks for shopping\n";
+            break;
+        }
+        else if (choice == 7) {
+            int product_id;
+            cout << "Enter product ID to check availability: ";
+            cin >> product_id;
+
+            if (inventory.checkAvailability(product_id)) {
+                cout << "Product is available in stock.\n";
+            } else {
+                cout << "Product is not available in stock.\n";
+            }
+        }
+       
+        else {
+            cout << "Invalid choice. Please try again.\n";
+        }
+    }
+
+    return 0;
+}
