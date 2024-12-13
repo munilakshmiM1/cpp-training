@@ -1,0 +1,211 @@
+FOOD ORDERING SYSTEM
+
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+struct MenuItem {
+    string name;
+    double price;
+    MenuItem* next;  // Pointer to the next 
+
+    // Constructor
+    MenuItem(string itemName, double itemPrice)
+        : name(itemName), price(itemPrice), next(nullptr) {}
+};
+struct Restaurant {
+    string name;
+    MenuItem* menu; 
+
+    // Constructor 
+    Restaurant(string restaurantName)
+        : name(restaurantName), menu(nullptr) {}
+};
+
+// Order structure 
+struct Order {
+    string restaurantName;
+    vector<MenuItem*> orderedItems;
+};
+
+class FoodOrderingSystem {
+private:
+    vector<Restaurant> restaurants;  // Vector to store all restaurants
+    vector<Order> orders;  // Vector to store all orders
+    
+public:
+    //  add a restaurant 
+    void addRestaurant(const string& name) {
+        Restaurant newRestaurant(name);
+        restaurants.push_back(newRestaurant);
+        cout << "Restaurant " << name << " added.\n";
+    }
+    
+    //  add a menu item to a restaurant's menu 
+    void addMenuItem(const string& restaurantName, const string& itemName, double price) {
+        for (auto& restaurant : restaurants) {
+            if (restaurant.name == restaurantName) {
+                MenuItem* newItem = new MenuItem(itemName, price);
+                if (!restaurant.menu) {
+                    restaurant.menu = newItem;  // If menu is empty, set the first item
+                } else {
+                    MenuItem* temp = restaurant.menu;
+                    while (temp->next) {
+                        temp = temp->next;  // Traverse to the end of the linked list
+                    }
+                    temp->next = newItem;  // Add the new item to the end
+                }
+                cout << "Menu item '" << itemName << "' added to " << restaurantName << " menu.\n";
+                return;
+            }
+        }
+        cout << "Restaurant not found.\n";
+    }
+
+    // display the menu of a restaurant
+    void displayMenu(const string& restaurantName) {
+        for (const auto& restaurant : restaurants) {
+            if (restaurant.name == restaurantName) {
+                cout << "Menu for " << restaurantName << ":\n";
+                MenuItem* temp = restaurant.menu;
+                int index = 1;
+                while (temp) {
+                    cout << index++ << ". " << temp->name << " - $" << temp->price << "\n";
+                    temp = temp->next;
+                }
+                return;
+            }
+        }
+        cout << "Restaurant not found.\n";
+    }
+
+    //  place an order 
+    void placeOrder(const string& restaurantName) {
+        Order newOrder;
+        newOrder.restaurantName = restaurantName;
+            // restuarent 
+        for (auto& restaurant : restaurants) {
+            if (restaurant.name == restaurantName) {
+                cout << "Placing order for " << restaurantName << ":\n";
+                int itemChoice;
+                while (true) {
+                    displayMenu(restaurantName);
+                    cout << "Enter the number of the item you want to order: ";
+                    cin >> itemChoice;
+                    if (itemChoice == 0) break;  // Finish the order
+                    if (itemChoice > 0 && itemChoice <= countMenuItems(restaurant)) {
+                        MenuItem* temp = restaurant.menu;
+                        for (int i = 1; i < itemChoice; ++i) {
+                            temp = temp->next;  // Traverse to the selected item
+                        }
+                        newOrder.orderedItems.push_back(temp);  // Add the ordered item
+                        cout << "Added " << temp->name << " to your order.\n";
+                    } else {
+                        cout << "Invalid item choice. Try again.\n";
+                    }
+                }
+                orders.push_back(newOrder);
+                cout << "Order placed successfully.\n";
+                return;
+            }
+        }
+        cout << "Restaurant not found.\n";
+    }
+
+    //  process the next order
+    void processOrder() {
+        if (orders.empty()) {
+            cout << "No orders to process.\n";
+            return;
+        }
+
+        Order orderToProcess = orders.front();
+
+        cout << "Processing order from " << orderToProcess.restaurantName << ":\n";
+        double total = 0.0;
+        for (const auto& item : orderToProcess.orderedItems) {
+            cout << item->name << " - $" << item->price << "\n";
+            total += item->price;
+        }
+        cout << "Total: $" << total << "\n";
+    }
+
+    int countMenuItems(const Restaurant& restaurant) {
+        int count = 0;
+        MenuItem* temp = restaurant.menu;
+        while (temp) {
+            count++;
+            temp = temp->next;
+        }
+        return count;
+    }
+};
+
+int main() {
+    FoodOrderingSystem system;
+
+    int choice;
+    do {
+        cout << "\n--- Welcome to food ordering system--\n";
+        cout << "1. Add Restaurant\n";
+        cout << "2. Add Menu Item\n";
+        cout << "3. Display Menu\n";
+        cout << "4. Place Order\n";
+        cout << "5. Process Next Order\n";
+        cout << "6. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        string restaurantName, itemName;
+        double price;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter restaurant name: ";
+                cin.ignore();
+                getline(cin, restaurantName);
+                system.addRestaurant(restaurantName);
+                break;
+
+            case 2:
+                cout << "Enter restaurant name: ";
+                cin.ignore();
+                getline(cin, restaurantName);
+                cout << "Enter menu item name: ";
+                getline(cin, itemName);
+                cout << "Enter price: ";
+                cin >> price;
+                system.addMenuItem(restaurantName, itemName, price);
+                break;
+
+            case 3:
+                cout << "Enter restaurant name: ";
+                cin.ignore();
+                getline(cin, restaurantName);
+                system.displayMenu(restaurantName);
+                break;
+
+            case 4:
+                cout << "Enter restaurant name to place an order: ";
+                cin.ignore();
+                getline(cin, restaurantName);
+                system.placeOrder(restaurantName);
+                break;
+
+            case 5:
+                system.processOrder();
+                break;
+
+            case 6:
+                cout << "Exit  thank you.\n";
+                break;
+
+            default:
+                cout << "Invalid choice. Try again.\n";
+        }
+
+    } while (choice != 6);
+
+    return 0;
+}

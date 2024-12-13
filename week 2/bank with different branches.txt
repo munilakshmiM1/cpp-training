@@ -1,0 +1,139 @@
+
+bank with many branches
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+class BankAccount {
+protected:
+    int accountNumber;         // Unique account number
+    string accountHolder;       // Name of the account holder
+    double balance;             // Account balance
+
+public:
+    // Constructor
+    BankAccount(int accNumber, const string& accHolder, double initialBalance)
+        : accountNumber(accNumber), accountHolder(accHolder), balance(initialBalance) {}
+
+    // Deposit function
+    void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            cout << "Deposited $" << amount << " to account " << accountNumber << ".\n";
+        } else {
+            cout << "Invalid deposit amount.\n";
+        }
+    }
+
+    // Withdraw function
+    void withdraw(double amount) {
+        if (amount > 0 && amount <= balance) {
+            balance -= amount;
+            cout << "Withdrew $" << amount << " from account " << accountNumber << ".\n";
+        } else {
+            cout << "Invalid withdrawal amount.\n";
+        }
+    }
+
+    // Display function
+    void display() const {
+        cout << "Account Number: " << accountNumber << ", Holder: " << accountHolder
+             << ", Balance: $" << balance << endl;
+    }
+
+    // Get account number (to find account in BankSystem)
+    int getAccountNumber() const {
+        return accountNumber;
+    }
+};
+
+class BankSystem {
+private:
+    vector<vector<BankAccount>> branches;  // Each branch contains a list of accounts
+
+public:
+    // Initialize a specific number of branches
+    BankSystem(int noOfBranches) {
+        branches.resize(noOfBranches);
+    }
+
+    // Add an account to a specific branch
+    void addAccountToBranch(int branchIndex, const BankAccount& account) {
+        if (branchIndex >= 0 && branchIndex < branches.size()) {
+            branches[branchIndex].push_back(account);
+            cout << "Account added to branch " << branchIndex << ".\n";
+        } else {
+            cout << "Branch index out of range.\n";
+        }
+    }
+
+    // Display all accounts in all branches
+    void displayAllAccs() const {
+        for (int i = 0; i < branches.size(); ++i) {
+            cout << "Branch " << i << " accounts:\n";
+            for (const auto& account : branches[i]) {
+                account.display();
+            }
+        }
+    }
+
+    // Deposit to a specific account in a specific branch
+    void depositToAccount(int branchIndex, int accountNum, double amount) {
+        if (branchIndex >= 0 && branchIndex < branches.size()) {
+            for (auto& account : branches[branchIndex]) {
+                if (account.getAccountNumber() == accountNum) {
+                    account.deposit(amount);
+                    return;
+                }
+            }
+            cout << "Account number " << accountNum << " not found in branch " << branchIndex << ".\n";
+        } else {
+            cout << "Branch index out of range.\n";
+        }
+    }
+
+    // Withdraw from a specific account in a specific branch
+    void withdrawFromAccount(int branchIndex, int accountNum, double amount) {
+        if (branchIndex >= 0 && branchIndex < branches.size()) {
+            for (auto& account : branches[branchIndex]) {
+                if (account.getAccountNumber() == accountNum) {
+                    account.withdraw(amount);
+                    return;
+                }
+            }
+            cout << "Account number " << accountNum << " not found in branch " << branchIndex << ".\n";
+        } else {
+            cout << "Branch index out of range.\n";
+        }
+    }
+};
+
+int main() {
+    // Create a bank system with 2 branches
+    BankSystem bankSystem(2);
+
+    // Create some accounts
+    BankAccount acc1(1001, "Alice", 500.0);
+    BankAccount acc2(1002, "Bob", 1500.0);
+    BankAccount acc3(1003, "Charlie", 250.0);
+
+    // Add accounts to branches
+    bankSystem.addAccountToBranch(0, acc1);
+    bankSystem.addAccountToBranch(0, acc2);
+    bankSystem.addAccountToBranch(1, acc3);
+
+    // Display all accounts
+    bankSystem.displayAllAccs();
+
+    // Deposit to an account
+    bankSystem.depositToAccount(0, 1001, 200.0);
+
+    // Withdraw from an account
+    bankSystem.withdrawFromAccount(1, 1003, 50.0);
+
+    // Display all accounts again to see changes
+    bankSystem.displayAllAccs();
+
+    return 0;
+}

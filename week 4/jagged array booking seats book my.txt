@@ -1,0 +1,95 @@
+//jagged array booking seats book my show 
+#include<iostream>
+using namespace std;
+int main(){
+    int rows;
+    cout<<"enter no.of rows in theater"<<endl;
+    cin>>rows;
+    // dynamically allocate an array of pointer for rows
+    int *theater=new int[rows];
+    // input no.of seats in each row an alloacte for each row
+    int *seatsInRow= new int [rows];
+    for(int i=0;i<rows;i++){
+        cout<<"enter no.of seats in row"<<i+1<<": ";
+        cin>>seatsInRow[i];
+        theater[i]=new int [seatsInRow[i]];//allocate memory for seats in row
+        for(int j=0;j<seatsInRow[i];j++){
+            theater[i][j]=0;
+        }
+       }
+       //intializing seats to 0
+       for(int i=0;i<rows;i++){
+           for(int j=0;j<seatsInRow[i];j++){
+              theater[i][j]=0; 
+           }
+       }
+       int choice;
+       //book/cancel/view
+       while(true){
+           cout<<endl<<"menu:"<<endl;
+           cout<<endl<<"1. book a seat:"<<endl;
+           cout<<endl<<"2. cancel a seat:"<<endl;
+           cout<<endl<<"3.view seating arrangement:"<<endl;
+           cout<<endl<<"4. exit"<<endl;
+           cout<<endl<<"enter your choice:"<<endl;
+           cin>>choice;
+           if(choice==1){// book a seat
+           int row,seat;
+           cout<<"enter row number:";
+           cin>>row;
+           cout<<"enter seat number:";
+           cin>>seat;
+           if(row<1 || row>rows || seat<1 || seat>seatsInRow[row-1]){
+               cout<<"inavalid seat or row number"<<endl;
+           }
+           else if(theater[row -1][seat-1]==0){
+               cout<<"seats already unoccupied"<<endl;
+           }
+           else{
+               theater[row -1][seat-1]=0;//mark seat as unoccupied
+               cout<<"booked seat "<<endl;
+           }
+           if(choice==2){// cancel
+           int row,seat;
+           cout<<"enter row number:";
+           cin>>row;
+           cout<<"enter seat number:";
+           cin>>seat;
+           if(row<1 || row>rows || seat<1 || seat>seatsInRow[row-1]){
+               cout<<"inavalid seat or row number"<<endl;
+           }
+           else if(theater[row -1][seat-1]==0){
+               cout<<"seats already unoccupied"<<endl;
+           }
+           else{
+               theater[row -1][seat-1]=0;//mark seat as unoccupied
+               cout<<"seat cancellation successful"<<endl;
+           }
+               
+           }
+           if(choice ==3){// view bookings
+               cout<<" seating arrangemnt (0:unoccupied, 1:occupied"<<endl;
+       for(int i=0;i<rows;i++){
+           cout<<"row"<<i+1<<" ";
+           for(int j=0;j<seatsInRow[i];j++){
+               cout<<theater[i][j]<<endl;
+           }
+           cout<<endl;
+           }
+               
+           }
+           else if(choice ==4)//exit
+           {
+               break;
+           }
+           else
+               cout<<"invalid choice! pls try again"<<endl;
+           }
+       // free allocated memory
+       for(int i=0;i<rows;i++){
+           delete[]theater[i];//delete array 
+       }
+            delete[] theater;
+           delete[] seatsInRow;// free array storing seat count
+       }
+}

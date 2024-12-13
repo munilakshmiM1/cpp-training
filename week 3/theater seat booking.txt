@@ -1,0 +1,42 @@
+// theater seat booking 
+
+#include<iostream>
+using namespace std;
+int main(){
+    int rows;
+    cout<<"enter no.of rows in theater"<<endl;
+    cin>>rows;
+    // dynamically allocate an array of pointer for rows
+    int *theater=new int[rows];
+    // input no.of seats in each row an alloacte for each row
+    int *seatsInRow= new int [rows];
+    for(int i=0;i<rows;i++){
+        cout<<"enter no.of seats in row"<<i+1<<": ";
+        cin>>seatsInRow[i];
+        theater[i]=new int [seatsInRow[i]];//allocate memory for seats in row
+       }
+       //intializing seats to 0
+       for(int i=0;i<rows;i++){
+           for(int j=0;j<seatsInRow[i];j++){
+              theater[i][j]=0; 
+           }
+       }
+       //simulate seat bookings
+       theater[0][1]= 1;
+       theater[2][4]= 1;
+       cout<<"theater seating arrangemnt (0:unoccupied, 1:occupied"<<endl;
+       for(int i=0;i<rows;i++){
+           cout<<"row"<<i+1<<" ";
+           for(int j=0;j<seatsInRow[i];j++){
+               cout<<theater[i][j]<<endl;
+           }
+           cout<<endl;
+       }
+       // free allocated memory
+       for(int i=0;i<rows;i++){
+           delete[]theater[i];//delete array 
+           delete[] seatsInRow;// free array storing seat count
+       }
+    
+    
+}
