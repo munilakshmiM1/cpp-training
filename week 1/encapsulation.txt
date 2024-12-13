@@ -1,0 +1,60 @@
+#include <iostream> 
+#include <string> 
+using namespace std; 
+class BankAccount { 
+private: 
+// Private member variables 
+string owner; 
+double balance; 
+ 
+public: 
+// Constructor to initialize owner and balance 
+BankAccount(string accOwner, double initialBalance) { 
+owner = accOwner; 
+if (initialBalance >= 0) { 
+balance = initialBalance; 
+} else { 
+balance = 0; 
+cout << "Initial balance invalid. Setting to 0.\n"; 
+} 
+} 
+// Public getter method for owner 
+string getOwner() const { 
+return owner; 
+} 
+// Public getter method for balance 
+double getBalance() const { 
+return balance; 
+} 
+// Public method to deposit money 
+void deposit(double amount) { 
+if (amount > 0) { 
+balance += amount; 
+cout << "Deposited $" << amount << ". New balance: $" << balance << "\n"; 
+} else { 
+cout << "Deposit amount must be positive.\n"; 
+} 
+} 
+// Public method to withdraw money 
+void withdraw(double amount) { 
+if (amount > 0 && amount <= balance) { 
+balance -= amount; 
+cout << "Withdrew $" << amount << ". New balance: $" << balance << "\n"; 
+} else { 
+ 
+} 
+} 
+cout << "Invalid withdrawal amount.\n"; 
+}; 
+int main() { 
+// Create a new BankAccount object 
+BankAccount account("Alice", 1000.0); 
+// Access and modify balance through methods 
+cout << "Account Owner: " << account.getOwner() << "\n"; 
+cout << "Initial Balance: $" << account.getBalance() << "\n"; 
+// Deposit and withdraw money 
+account.deposit(500.0); 
+account.withdraw(200.0); 
+account.withdraw(1500.0); // Attempt an invalid withdrawal 
+return 0; 
+}
