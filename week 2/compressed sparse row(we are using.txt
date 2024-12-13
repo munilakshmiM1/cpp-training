@@ -1,0 +1,64 @@
+// compressed sparse row(we are using array in this CSR)
+#include<iostream>
+#include<vector>
+using namespace std;
+class sparseArray{
+    private:
+    vector<int> values;
+    vector<int> colVec;
+    vector<int> rowVec;
+    int nRow;
+    int cCol;
+    public:
+    sparseArray(int rows,int cols): nRow(rows),cCol(cols){
+        rowVec.resize(rows+1,0);
+    }
+    // add non-zero values
+    void addValues(int row,int col,int value){
+        if(value==0)
+        return;
+        values.push_back(value);
+        colVec.push_back(col);
+        // update row vector
+        for(int i=row+1;i<nRow;++i){
+            rowVec[i]++;
+        }
+    }
+    // get elements of sparse array
+    int getValue(int row,int col)const{
+        int rowStart=rowVec[row];
+        int rowEnd =rowVec[row + 1];
+        // iterate through thr rowVec
+        for(int i=rowStart;i<rowEnd;i++){
+            if(colVec[i]==col){
+                return values[i];
+            }
+        }
+        return 0;
+    }
+    void displayCSR() const{
+        cout<<"values:"<<endl;
+        for(int val :values)
+            cout<<val<<" ";
+            cout<<"\ncolumn index:"<<endl;
+            for(int col:colVec)
+            cout<<col<<" ";
+            cout<<"\nrow indeex"<<endl;
+            for(int row:rowVec)
+            cout<<row<<" ";
+        
+    }
+};
+int main(){
+    sparseArray csr(4, 4);
+    csr.addValues(0,1,20);
+    csr.addValues(1,0,10);
+    csr.addValues(1,1,20);
+    csr.addValues(0,0,30);
+    csr.addValues(3,1,0);
+    csr.addValues(2,1,20);
+    cout<<"display:"<<endl;
+    csr.displayCSR();
+    return 0;
+}
+

@@ -1,0 +1,173 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// Structure to store patient info
+struct Patient {
+    int patientId;
+    string name;
+    Patient* left;
+    Patient* right;
+
+    Patient(int id, string n) : patientId(id), name(n), left(nullptr), right(nullptr) {}
+};
+
+// Structure to represent departments &sub
+struct Department {
+    string name;
+    Department* left;
+    Department* right;
+    Patient* patientRoot;
+
+    Department(string n) : name(n), left(nullptr), right(nullptr), patientRoot(nullptr) {}
+};
+
+// Main Hospital Management System
+class HospitalManagementSystem {
+    Department* root;
+
+public:
+    // Constructor
+    HospitalManagementSystem(string rootName) {
+        root = new Department(rootName);
+    }
+
+    // Add a sub-department
+    void addSubDept(string parentName, string subName) {
+        Department* parent = findDepartment(root, parentName);
+        if (parent) {
+            if (!parent->left) {
+                parent->left = new Department(subName);
+            } else if (!parent->right) {
+                parent->right = new Department(subName);
+            } else {
+                cout << "Both child nodes are occupied  " << parentName << endl;
+            }
+        } else {
+            cout << "Parent department " << parentName << " not found." << endl;
+        }
+    }
+
+    // Adding patient to dept
+    void addPatient(string departmentName, int id, string name) {
+        Department* department = findDepartment(root, departmentName);
+        if (department) {
+            department->patientRoot = insertPatient(department->patientRoot, id, name);
+        } else {
+            cout << "Department " << departmentName << " not found!" << endl;
+        }
+    }
+
+    // Delete a patient
+    void deletePatient(string departmentName, int id) {
+        Department* department = findDepartment(root, departmentName);
+        if (department) {
+            department->patientRoot = deletePatient(department->patientRoot, id);
+        } else {
+            cout << "Department " << departmentName << " not found!" << endl;
+        }
+    }
+
+    // Display all patient records
+    void displayPatients(string departmentName) {
+        Department* department = findDepartment(root, departmentName);
+        if (department) {
+            cout << "Patient records in " << departmentName << " department:" << endl;
+            inOrderTraversal(department->patientRoot);
+        } else {
+            cout << "Department " << departmentName << " not found!" << endl;
+        }
+    }
+
+    void displayDepartments(Department* dept, int level = 0) {
+        if (!dept) return;
+        for (int i = 0; i < level; ++i) cout << "  ";
+        cout << dept->name << endl;
+        displayDepartments(dept->left, level + 1);
+        displayDepartments(dept->right, level + 1);
+    }
+    Department* findDepartment(Department* dept, string name) {
+        if (!dept) return nullptr;
+        if (dept->name == name) return dept;
+        Department* found = findDepartment(dept->left, name);
+        if (found) return found;
+        return findDepartment(dept->right, name);
+    }
+    // Display all departments starting from the root
+    void displayAllDepartments() {
+        displayDepartments(root);
+    }
+
+private:
+    // insert a patient
+    Patient* insertPatient(Patient* root, int id, string name) {
+        if (!root) return new Patient(id, name);
+        if (id < root->patientId) {
+            root->left = insertPatient(root->left, id, name);
+        } else if (id > root->patientId) {
+            root->right = insertPatient(root->right, id, name);
+        }
+        return root;
+    }
+
+    //  delete a patient
+    Patient* deletePatient(Patient* root, int id) {
+        if (!root) return root;
+        if (id < root->patientId) {
+            root->left = deletePatient(root->left, id);
+        } else if (id > root->patientId) {
+            root->right = deletePatient(root->right, id);
+        } else {
+            if (!root->left) {
+                Patient* temp = root->right;
+                delete root;
+                return temp;
+            } else if (!root->right) {
+                Patient* temp = root->left;
+                delete root;
+                return temp;
+            }
+            Patient* temp = minValueNode(root->right);
+            root->patientId = temp->patientId;
+            root->name = temp->name;
+            root->right = deletePatient(root->right, temp->patientId);
+        }
+        return root;
+    }
+    Patient* minValueNode(Patient* node) {
+        Patient* current = node;
+        while (current && current->left) current = current->left;
+        return current;
+    }
+    void inOrderTraversal(Patient* root) {
+        if (!root) return;
+        inOrderTraversal(root->left);
+        cout << "Patient ID: " << root->patientId << ", Name: " << root->name << endl;
+        inOrderTraversal(root->right);
+    }
+};
+
+int main() {
+    HospitalManagementSystem hms("Hospital");
+
+    hms.addSubDept("Hospital", "Cardiology");
+    hms.addSubDept("Hospital", "Surgery");
+    hms.addSubDept("Cardiology", "Pediatric Cardiology");
+
+    hms.addPatient("Cardiology", 1, "John Doe");
+    hms.addPatient("Cardiology", 2, "Jane Smith");
+    hms.addPatient("Surgery", 3, "Alice Brown");
+
+    cout << "Departments:" << endl;
+   hms.displayAllDepartments();
+
+    cout << "\nPatient in Cardiology:" << endl;
+    hms.displayPatients("Cardiology");
+
+    hms.deletePatient("Cardiology", 1);
+
+    cout << "\n Cardiology after deletion:" << endl;
+    hms.displayPatients("Cardiology");
+
+    return 0;
+}

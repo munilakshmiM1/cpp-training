@@ -1,0 +1,48 @@
+//structure
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+using namespace std;
+class BankAccount{
+    private:
+    struct customerInfo{
+        string name;
+        int age;
+        string address;
+    };
+    customerInfo customer;
+    double balance;
+    public:
+    BankAccount(const string& name,int age,const string&adress,double initialbal):balance(initial bal){
+        customer.name=name;
+        customer.age=age;
+        customer.addres=address;
+    }
+    void deposit(double amount){
+        if(amount>0){
+            balance +=amount;
+            cout<<"deposit :"<<amount<<".updated"<<balance<<endl;
+        }
+            else{
+                cout<<"invalid balance"<<endl;
+            }
+        }
+        void withdraw(double amount){
+            if(amount>0 &&amount<=balance){
+                balance -=amount;
+                cout<<"withdraw:"<<amount<<".updated"<<balance<<endl;
+            }
+            else{
+                cout<<"insufficient fund"<<endl;
+            }
+        }
+        void displayAccountInfo()const{
+            cout<<"customer name:"<<customer.name<<endl;
+        }
+        
+    };
+    int main(){
+        BankAccount account("chinnu",23,"banglore",)
+    }
+    
+

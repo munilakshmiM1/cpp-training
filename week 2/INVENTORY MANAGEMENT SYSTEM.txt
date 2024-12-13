@@ -1,0 +1,177 @@
+// INVENTORY MANAGEMENT SYSTEM
+
+#include <iostream>
+#include <unordered_map>
+#include <string>
+
+using namespace std;
+// constructor
+class InventoryItem {
+public:
+    int quantity;
+    double price;
+    InventoryItem(int qty = 0, double pr = 0.0) : quantity(qty), price(pr) {}
+};
+
+class InventoryManagementSystem {
+private:
+    int rows, cols; //  (aisles=rows, bins=cols)
+    InventoryItem*** inventory; // Multi-dimensional array using pointer to pointer
+    unordered_map<string, pair<int, int>> itemLocationMap;
+    int lowStockThreshold;
+
+public:
+    InventoryManagementSystem(int r, int c, int threshold) : rows(r), cols(c), lowStockThreshold(threshold) {
+        inventory = new InventoryItem**[rows];
+        for (int i = 0; i < rows; ++i) {
+            inventory[i] = new InventoryItem*[cols];
+            for (int j = 0; j < cols; ++j) {
+                inventory[i][j] = nullptr; // Initialize each slot to nullptr
+            }
+        }
+    }
+
+    ~InventoryManagementSystem() {
+       
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                delete inventory[i][j]; // Delete each InventoryItem if it was allocated
+            }
+            delete[] inventory[i]; // Delete each row
+        }
+        delete[] inventory; // Delete the main array
+    }
+
+    void addInventory(const string& itemName, int r, int c, int qty, double price) {
+        if (r >= rows || c >= cols || r < 0 || c < 0) {
+            cout << "Invalid location!" << endl;
+            return;
+        }
+        if (qty <= 0 || price < 0) {
+            cout << "Quantitycan't be negative! and zero" << endl;
+            return;
+        }
+
+        if (!inventory[r][c]) {
+            inventory[r][c] = new InventoryItem(qty, price); 
+        } else {
+            inventory[r][c]->quantity += qty; // Add quantity 
+            inventory[r][c]->price = price;   // Update the price
+        }
+
+        itemLocationMap[itemName] = {r, c}; // Update the item's location
+        cout << "Added " << qty << " of " << itemName << " with price " << price << " to location (" << r << "," << c << ")" << endl;
+    }
+
+    void removeInventory(const string& itemName, int qty) {
+        auto location = itemLocationMap.find(itemName);
+        if (location == itemLocationMap.end()) {
+            cout << "Item not found!" << endl;
+            return;
+        }
+
+        int r = location->second.first;
+        int c = location->second.second;
+
+        if (!inventory[r][c] || inventory[r][c]->quantity < qty) {
+            cout << "Not enough quantity to remove!" << endl;
+            return;
+        }
+
+        inventory[r][c]->quantity -= qty;
+        if (inventory[r][c]->quantity == 0) {
+            delete inventory[r][c]; // Delete the item if quantity is zero
+            inventory[r][c] = nullptr;
+            itemLocationMap.erase(itemName);
+        }
+        cout << "Removed " << qty << " of " << itemName << " from location (" << r << "," << c << ")" << endl;
+    }
+
+    void checkStock(const string& itemName) const {
+        auto location = itemLocationMap.find(itemName);
+        if (location == itemLocationMap.end()) {
+            cout << "Item not found!" << endl;
+            return;
+        }
+
+        int r = location->second.first;
+        int c = location->second.second;
+        cout << "Stock of " << itemName << " at (" << r << "," << c << ") is " << inventory[r][c]->quantity
+             << " with price $" << inventory[r][c]->price << endl;
+    }
+    void displayInventory() const {
+        cout << "Displaying all items with their locations, quantities, and prices(for each piece):" << endl;
+        for (const auto& item : itemLocationMap) {
+            int r = item.second.first;
+            int c = item.second.second;
+            cout << "Item: " << item.first << " at (" << r << "," << c << ") with quantity " << inventory[r][c]->quantity
+                 << " and price $" << inventory[r][c]->price << endl;
+        }
+    }
+
+    void lowStockAlert() const {
+        cout << "Low stock items (below threshold of " << lowStockThreshold << "):" << endl;
+        for (const auto& item : itemLocationMap) {
+            int r = item.second.first;
+            int c = item.second.second;
+            if (inventory[r][c] && inventory[r][c]->quantity < lowStockThreshold) {
+                cout << "Item: " << item.first << " at (" << r << "," << c << ") with quantity " << inventory[r][c]->quantity
+                     << " and price $" << inventory[r][c]->price << endl;
+            }
+        }
+    }
+};
+
+int main() {
+    int rows = 5, cols = 5, threshold = 10;
+    InventoryManagementSystem ims(rows, cols, threshold);
+
+    int choice;
+    string itemName;
+    int row, col, qty;
+    double price;
+
+    do {
+        cout << "\nInventory Management System Menu:\n";
+        cout << "1. Add Inventory\n";
+        cout << "2. Remove Inventory\n";
+        cout << "3. Check Stock\n";
+        
+        cout << "4. Display Inventory\n";
+        cout << "5. Low Stock Alert\n";
+        cout << "0. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter item name, row, col, quantity, and price(each piece): ";
+                cin >> itemName >> row >> col >> qty >> price;
+                ims.addInventory(itemName, row, col, qty, price);
+                break;
+            case 2:
+                cout << "Enter item name and quantity to remove: ";
+                cin >> itemName >> qty;
+                ims.removeInventory(itemName, qty);
+                break;
+            case 3:
+                cout << "Enter item name to check stock: ";
+                cin >> itemName;
+                ims.checkStock(itemName);
+                break;
+            case 4:
+                ims.displayInventory();
+                break;
+            case 5:
+                ims.lowStockAlert();
+                break;
+            case 0:
+                cout << "Exiting the system.\n";
+                break;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 0);
+
+    return 0;
+}

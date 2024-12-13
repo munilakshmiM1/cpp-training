@@ -1,0 +1,248 @@
+SMART PARKING
+
+#include <iostream>
+#include <queue>
+#include <stack>
+#include <string>
+#include <ctime>
+#include <vector>
+#include <iomanip>
+#include <cmath>
+#include<unistd.h>
+
+using namespace std;
+
+// Vehicle Class
+class Vehicle {
+public:
+    string vehicleID;
+    string priority;
+    time_t entryTime;
+    time_t exitTime;
+
+    Vehicle(string id = "", string prio = "") : vehicleID(id), priority(prio), entryTime(0), exitTime(0) {}
+};
+
+// ParkingBay Class
+class ParkingBay {
+private:
+    stack<Vehicle> parkingStack;
+    int capacity;
+
+public:
+    ParkingBay(int cap) : capacity(cap) {}
+
+    bool parkVehicle(Vehicle vehicle) {
+        if (parkingStack.size() < capacity) {
+            parkingStack.push(vehicle);
+            return true;
+        }
+        return false; // Parking bay full
+    }
+
+    bool removeVehicle(Vehicle &vehicle) {
+        if (!parkingStack.empty()) {
+            vehicle = parkingStack.top();
+            parkingStack.pop();
+            return true;
+        }
+        return false; // Parking bay empty
+    }
+
+    vector<string> status() {
+        stack<Vehicle> tempStack = parkingStack;
+        vector<string> status;
+        while (!tempStack.empty()) {
+            status.push_back(tempStack.top().vehicleID);
+            tempStack.pop();
+        }
+        return status;
+    }
+
+    bool isEmpty() {
+        return parkingStack.empty();
+    }
+};
+
+// WaitingQueue Class
+class WaitingQueue {
+private:
+    queue<Vehicle> waitingQueue;
+
+public:
+    void enqueue(Vehicle vehicle) {
+        waitingQueue.push(vehicle);
+    }
+
+    bool dequeue(Vehicle &vehicle) {
+        if (!waitingQueue.empty()) {
+            vehicle = waitingQueue.front();
+            waitingQueue.pop();
+            return true;
+        }
+        return false; // Waiting queue empty
+    }
+
+    vector<string> status() {
+        queue<Vehicle> tempQueue = waitingQueue;
+        vector<string> status;
+        while (!tempQueue.empty()) {
+            status.push_back(tempQueue.front().vehicleID);
+            tempQueue.pop();
+        }
+        return status;
+    }
+
+    bool isEmpty() {
+        return waitingQueue.empty();
+    }
+};
+
+// PriorityQueue
+class PriorityQueue {
+private:
+    struct Compare {
+        bool operator()(const Vehicle &a, const Vehicle &b) {
+            return a.priority > b.priority;
+        }
+    };
+    priority_queue<Vehicle, vector<Vehicle>, Compare> priorityQueue;
+
+public:
+    void insert(Vehicle vehicle) {
+        priorityQueue.push(vehicle);
+    }
+
+    bool removeHighestPriority(Vehicle &vehicle) {
+        if (!priorityQueue.empty()) {
+            vehicle = priorityQueue.top();
+            priorityQueue.pop();
+            return true;
+        }
+        return false; // Priority queue empty
+    }
+
+    vector<string> status() {
+        priority_queue<Vehicle, vector<Vehicle>, Compare> tempQueue = priorityQueue;
+        vector<string> status;
+        while (!tempQueue.empty()) {
+            status.push_back(tempQueue.top().vehicleID);
+            tempQueue.pop();
+        }
+        return status;
+    }
+
+    bool isEmpty() {
+        return priorityQueue.empty();
+    }
+};
+
+// SmartParkingSystem Class
+class SmartParkingSystem {
+private:
+    ParkingBay parkingBay;
+    WaitingQueue waitingQueue;
+    PriorityQueue priorityQueue;
+    double totalRevenue;
+
+    double calculateFee(Vehicle vehicle) {
+        if (vehicle.entryTime == 0 || vehicle.exitTime == 0) {
+            return -1; 
+        }
+        double seconds = difftime(vehicle.exitTime, vehicle.entryTime);  // Time in seconds
+        double rate = (vehicle.priority == "normal") ? 20 : 10;  // Fee per second 
+        
+        return ceil(seconds) * rate;
+    }
+
+public:
+    SmartParkingSystem(int bayCapacity) : parkingBay(bayCapacity), totalRevenue(0) {}
+
+    void vehicleEntry(string id, string priority) {
+        Vehicle vehicle(id, priority);
+        vehicle.entryTime = time(0); // Record entry time when the vehicle enters
+
+        if (parkingBay.parkVehicle(vehicle)) {
+            cout << "Vehicle " << id << " parked.\n";
+        } else if (priority == "emergency") {
+            priorityQueue.insert(vehicle);
+            cout << "Vehicle " << id << " added to the priority queue.\n";
+        } else {
+            waitingQueue.enqueue(vehicle);
+            cout << "Vehicle " << id << " added to the waiting queue.\n";
+        }
+    }
+
+    void vehicleExit(int exitDelayInSeconds) {
+        Vehicle vehicle;
+        if (!parkingBay.removeVehicle(vehicle)) {
+            cout << "Parking bay is empty. No vehicles to exit.\n";
+            return;
+        }
+
+        // setting exit time
+        vehicle.exitTime = vehicle.entryTime + exitDelayInSeconds;
+        double fee = calculateFee(vehicle);
+
+        if (fee < 0) {
+            cout << "Error: Invalid time for vehicle " << vehicle.vehicleID << ".\n";
+            return;
+        }
+
+        totalRevenue += fee;
+        cout << "Vehicle " << vehicle.vehicleID << " exited after " << exitDelayInSeconds << " seconds. Fee: $"
+             << fixed << setprecision(2) << fee << "\n";
+
+        
+        Vehicle nextVehicle;
+        if (priorityQueue.removeHighestPriority(nextVehicle)) {
+            nextVehicle.entryTime = time(0); // Update entry time when the vehicle enters
+            parkingBay.parkVehicle(nextVehicle);
+            cout << "Vehicle " << nextVehicle.vehicleID << " parked from priority queue.\n";
+        } else if (waitingQueue.dequeue(nextVehicle)) {
+            nextVehicle.entryTime = time(0); // Update entry time when the vehicle enters
+            parkingBay.parkVehicle(nextVehicle);
+            cout << "Vehicle " << nextVehicle.vehicleID << " parked from waiting queue.\n";
+        }
+    }
+
+    void systemReport() {
+        cout << "\n--- System Report ---\n";
+        cout << "Total Revenue: $" << fixed << setprecision(2) << totalRevenue << "\n";
+
+        cout << "Parking Bay Status: ";
+        for (const auto& id : parkingBay.status()) cout << id << " ";
+        cout << "\n";
+
+        cout << "Waiting Queue Status: ";
+        for (const auto& id : waitingQueue.status()) cout << id << " ";
+        cout << "\n";
+
+        cout << "Priority Queue Status: ";
+        for (const auto& id : priorityQueue.status()) cout << id << " ";
+        cout << "\n";
+    }
+};
+
+// Main Function
+int main() {
+    SmartParkingSystem system(3);//capacity 3
+
+    // Vehicles entering the parking system
+    system.vehicleEntry("CAR001", "normal");
+    system.vehicleEntry("CAR002", "emergency");
+    system.vehicleEntry("CAR003", "normal");
+    system.vehicleEntry("CAR004", "normal");
+    system.vehicleEntry("CAR005", "emergency");
+
+    // Report after entries
+    system.systemReport();
+    
+
+    // Simulate vehicles exiting after staying for 5 seconds
+    system.vehicleExit(5);// exiting
+    system.vehicleExit(5);
+    system.systemReport();
+
+    return 0;
+}

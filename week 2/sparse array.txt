@@ -1,0 +1,83 @@
+
+// sparse array
+
+#include<iostream>
+#include<map>
+
+using namespace std;
+template <typename T>
+class sparseArray{
+    private:
+    map<int,T>data;//map to store non-zero values
+    int size;// total size of sparse array
+    public:
+    sparseArray(int size):size(size){}
+    
+    // set a value at given index
+    void set(int index, T value){
+        if(index<0 || index>=size){
+            cerr<<"index out of range"<<endl;
+            return ;
+        }
+        if(value!=  T {}){
+            data[index]=value;// store non zero values
+            cout<<"set value"<<value<<endl;
+        }
+        else{
+            data.erase(index);// remove the entry if the value is 0
+            cout<<"removed value at index:"<<index<<endl;
+        }
+    }
+    // get values at given index
+    T get(int index)const{
+        if(index<0 || index>=size){
+            cerr<<"index out of bounds"<<endl;
+        }
+        auto it=data.find(index);
+        // return zero or default value if not found
+        return (it !=data.end())?it->second:T{};
+        
+    }
+    // display non-zero elements in the sparse array
+    void display()const{
+        cout<<"sparse array(non zero elements)"<<endl;
+        for(const auto& [index, value]:data){
+            cout<<"index:"<<index<<", value:"<<value<<endl;
+        }
+    }
+    // get the total size of sparse array
+    int getsize()const
+    {
+        return size;
+    }
+};
+int main(){
+    sparseArray<int>sparse(10);
+    for(int i=0;i<sparse.getsize();i++){
+        int value=(i%2== 0)?i*10:0;
+        sparse.set(i,value);
+    }
+    sparse.display();
+    cout<<"value at index 4:"<<sparse.get(4)<<endl;
+    return 0;
+}
+
+removed value at index:0
+removed value at index:1
+set value20
+removed value at index:3
+set value40
+removed value at index:5
+set value60
+removed value at index:7
+set value80
+removed value at index:9
+sparse array(non zero elements)
+index:2, value:20
+index:4, value:40
+index:6, value:60
+index:8, value:80
+value at index 4:40
+
+
+

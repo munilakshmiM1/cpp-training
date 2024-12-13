@@ -1,0 +1,25 @@
+#include<iostream>
+void 
+class ApplyInterest{
+    private:
+    double interestRate
+}
+int main(){
+    vector<BankAccount>accounts={
+        BankAccount("abcd",10000.0),
+        BankAccount("abed",2000.0),
+        BankAccount("abkl",30000.0),
+        
+    };
+    cout<<"intialbalance"<<endl;
+    for(const auto& account:accouts){
+        account.displayAccountInfo();
+    }
+    ApplyInterest applyFunctor(0.05);
+    for_each (accounts.begin(),accounts.end(),applyIntFunctor);
+    cout<<"balance after interest"<<endl;
+    for(const auto& account:accounts){
+        account.displayAccountInfo();
+    }
+    return 0;
+}
