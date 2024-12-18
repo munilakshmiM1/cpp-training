@@ -1,0 +1,93 @@
+
+// word ladder problem  (transform FOOL to SAGE)
+#include <iostream>
+#include <queue>
+#include <unordered_set>
+#include <unordered_map>
+#include <vector>
+using namespace std;
+
+class WordLadder {
+private:
+    bool isOneLetterDifferent(const string& word1, const string& word2) {
+        int count = 0;
+        for (int i = 0; i < word1.size(); i++) {
+            if (word1[i] != word2[i]) {
+                count++;
+                if (count > 1) return false;
+            }
+        }
+        return count == 1;
+    }
+
+public:
+    //shortest transformation sequence using BFS
+    vector<string> findLadder(string beginWord, string endWord, unordered_set<string>& wordList) {
+        if (wordList.find(endWord) == wordList.end()) return {};  // If endWord is not in the list
+
+        // BFS initialization
+        queue<vector<string>> q;  // queue to store paths
+        q.push({beginWord});
+        wordList.erase(beginWord);  // Remove the start word from the list
+
+        while (!q.empty()) {
+            int levelSize = q.size();
+            unordered_set<string> visitedInLevel;  // To keep track of visited words in this level
+
+            for (int i = 0; i < levelSize; i++) {
+                vector<string> path = q.front();
+                q.pop();
+                string lastWord = path.back();
+
+                // Check all possible words in the wordList
+                for (auto it = wordList.begin(); it != wordList.end();) {
+                    if (isOneLetterDifferent(lastWord, *it)) {
+                        vector<string> newPath = path;
+                        newPath.push_back(*it);
+                        
+                        // If we found the end word, return the path
+                        if (*it == endWord) {
+                            return newPath;
+                        }
+
+                        // Otherwise, add the new word to the BFS queue
+                        q.push(newPath);
+                        visitedInLevel.insert(*it);
+                        it = wordList.erase(it);  // Remove the word from the list to avoid revisiting it
+                    } else {
+                        ++it;
+                    }
+                }
+            }
+            for (const string& word : visitedInLevel) {
+                wordList.erase(word);
+            }
+        }
+
+        return {};  // No path found
+    }
+};
+
+int main() {
+    // List of valid words
+    unordered_set<string> wordList = {
+        "FOOL", "food","POOL","wool" ,"POLL", "POLE", "PALE", "SALE", "SAGE", "SILL", "SAY", "FOES", "FATE"
+    };
+
+    WordLadder wl;
+    string start = "FOOL";
+    string end = "SAGE";
+
+    vector<string> ladder = wl.findLadder(start, end, wordList);
+
+    if (!ladder.empty()) {
+        cout << "Shortest transformation sequence from " << start << " to " << end << " is: " << endl;
+        for (const string& word : ladder) {
+            cout << word << " ";
+        }
+    } else {
+        cout << "No path found!" << endl;
+    }
+
+    return 0;
+}
